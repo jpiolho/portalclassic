@@ -4969,6 +4969,10 @@ void PlayerbotAI::findNearbyCreature()
             itr = m_findNPC.erase(itr); // all done lets go home
             m_bot->GetMotionMaster()->Clear(false);
             m_bot->GetMotionMaster()->MoveIdle();
+
+            // Prevent error from trying to increment after ending
+            if (itr == m_findNPC.end())
+                break;
         }
     }
 }
