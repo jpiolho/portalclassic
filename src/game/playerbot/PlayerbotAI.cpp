@@ -7218,6 +7218,7 @@ void PlayerbotAI::_HandleCommandSkill(std::string &text, Player &fromPlayer)
             if (!trainer_spells)
                 trainer_spells = tSpells;
  
+            bool hadSpells = false;
             for (TrainerSpellMap::const_iterator itr =  trainer_spells->spellList.begin(); itr !=  trainer_spells->spellList.end(); ++itr)
             {
                 TrainerSpell const* tSpell = &itr->second;
@@ -7242,6 +7243,9 @@ void PlayerbotAI::_HandleCommandSkill(std::string &text, Player &fromPlayer)
                 const SpellEntry *const pSpellInfo =  sSpellStore.LookupEntry(spellId);
                 if (!pSpellInfo)
                     continue;
+
+                hadSpells = true;
+
                 uint32 cost = uint32(floor(tSpell->spellCost *  fDiscountMod));
                 totalCost += cost;
  
@@ -7257,35 +7261,44 @@ void PlayerbotAI::_HandleCommandSkill(std::string &text, Player &fromPlayer)
                     msg << silver <<  "|r|cffc0c0c0s|r|cff00ff00";
                 msg << cost <<  "|r|cff95524Cc|r|cff00ff00\r";
             }
-            int32 moneyDiff = m_bot->GetMoney() - totalCost;
-            if (moneyDiff >= 0)
-            {
-                // calculate how much money bot has
-                uint32 gold = uint32(moneyDiff / 10000);
-                moneyDiff -= (gold * 10000);
-                uint32 silver = uint32(moneyDiff / 100);
-                moneyDiff -= (silver * 100);
-                msg << " ";
-                if (gold > 0)
-                    msg << gold <<  "|r|cfffffc00g|r|cff00ff00";
-                if (silver > 0)
-                    msg << silver <<  "|r|cffc0c0c0s|r|cff00ff00";
-                msg << moneyDiff <<  "|r|cff95524Cc|r|cff00ff00 left.";
+
+            if (hadSpells) {
+
+                int32 moneyDiff = m_bot->GetMoney() - totalCost;
+                if (moneyDiff >= 0)
+                {
+                    // calculate how much money bot has
+                    uint32 gold = uint32(moneyDiff / 10000);
+                    moneyDiff -= (gold * 10000);
+                    uint32 silver = uint32(moneyDiff / 100);
+                    moneyDiff -= (silver * 100);
+                    msg << " ";
+                    if (gold > 0)
+                        msg << gold << "|r|cfffffc00g|r|cff00ff00";
+                    if (silver > 0)
+                        msg << silver << "|r|cffc0c0c0s|r|cff00ff00";
+                    msg << moneyDiff << "|r|cff95524Cc|r|cff00ff00 left.";
+                }
+                else
+                {
+                    Announce(CANT_AFFORD);
+                    moneyDiff *= -1;
+                    uint32 gold = uint32(moneyDiff / 10000);
+                    moneyDiff -= (gold * 10000);
+                    uint32 silver = uint32(moneyDiff / 100);
+                    moneyDiff -= (silver * 100);
+                    msg << "I need ";
+                    if (gold > 0)
+                        msg << " " << gold << "|r|cfffffc00g|r|cff00ff00";
+                    if (silver > 0)
+                        msg << silver << "|r|cffc0c0c0s|r|cff00ff00";
+                    msg << moneyDiff << "|r|cff95524Cc|r|cff00ff00 more to learn all the spells!";
+                }
             }
-            else
+            else 
             {
-                Announce(CANT_AFFORD);
-                moneyDiff *= -1;
-                uint32 gold = uint32(moneyDiff / 10000);
-                moneyDiff -= (gold * 10000);
-                uint32 silver = uint32(moneyDiff / 100);
-                moneyDiff -= (silver * 100);
-                msg << "I need ";
-                if (gold > 0)
-                    msg << " " << gold <<  "|r|cfffffc00g|r|cff00ff00";
-                if (silver > 0)
-                    msg << silver <<  "|r|cffc0c0c0s|r|cff00ff00";
-                msg << moneyDiff <<  "|r|cff95524Cc|r|cff00ff00 more to learn all the spells!";
+                SendWhisper("This trainer doesn't have any spells to teach me", fromPlayer);
+                return;
             }
         }
     }
