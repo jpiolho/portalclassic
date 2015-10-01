@@ -7673,6 +7673,16 @@ void PlayerbotAI::_HandleCommandHelp(std::string &text, Player &fromPlayer)
             return;
         }
     }
+    if (bMainHelp || ExtractCommand("unequip", text))
+    {
+        SendWhisper(_HandleCommandHelpHelper("unequip", "I will unequip the linked item(s).", HL_ITEM, true), fromPlayer);
+
+        if (!bMainHelp)
+        {
+            if (text != "") SendWhisper(sInvalidSubcommand, fromPlayer);
+            return;
+        }
+    }
     if (bMainHelp || ExtractCommand("reset", text))
     {
         SendWhisper(_HandleCommandHelpHelper("reset", "I will reset all my states, orders, loot list, talent spec, ... Hey, that's kind of like memory loss."), fromPlayer);
