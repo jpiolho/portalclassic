@@ -5191,6 +5191,11 @@ void PlayerbotAI::UnequipItem(Item* src_item)
         m_bot->RemoveItem(INVENTORY_SLOT_BAG_0, src_slot, true);
         m_bot->StoreItem(dst_slot, src_item, true);
     }
+    else
+    {
+        m_bot->SendEquipError(msg, src_item, NULL);
+        return;
+    }
 }
 
 // submits packet to trade an item (trade window must already be open)
