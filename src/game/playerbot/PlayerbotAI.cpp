@@ -5175,6 +5175,24 @@ void PlayerbotAI::EquipItem(Item* src_Item)
     }
 }
 
+void PlayerbotAI::UnequipItem(Item* src_item)
+{
+    uint8 src_slot = src_item->GetSlot();
+    InventoryResult msg = m_bot->CanUnequipItem(src_slot,false);
+    if (msg != EQUIP_ERR_OK)
+    {
+        m_bot->SendEquipError(msg, src_item, NULL);
+        return;
+    }
+
+    ItemPosCountVec dst_slot;
+    msg = m_bot->CanStoreItem(NULL_BAG, NULL_SLOT, dst_slot, src_item, false);
+    if (msg == EQUIP_ERR_OK) {
+        m_bot->RemoveItem(INVENTORY_SLOT_BAG_0, src_slot, true);
+        m_bot->StoreItem(dst_slot, src_item, true);
+    }
+}
+
 // submits packet to trade an item (trade window must already be open)
 // default slot is -1 which means trade slots 0 to 5. if slot is set
 // to TRADE_SLOT_NONTRADED (which is slot 6) item will be shown in the
@@ -5960,6 +5978,9 @@ void PlayerbotAI::HandleCommand(const std::string& text, Player& fromPlayer)
     else if (ExtractCommand("equip", input, true)) // true -> "equip" OR "e"
         _HandleCommandEquip(input, fromPlayer);
 
+    else if (ExtractCommand("unequip", input))
+        _HandleCommandUnequip(input, fromPlayer);
+
     // find project: 20:50 02/12/10 rev.4 item in world and wait until ordered to follow
     else if (ExtractCommand("find", input, true)) // true -> "find" OR "f"
         _HandleCommandFind(input, fromPlayer);
@@ -6534,6 +6555,17 @@ void PlayerbotAI::_HandleCommandEquip(std::string &text, Player& /*fromPlayer*/)
     for (std::list<Item*>::iterator it = itemList.begin(); it != itemList.end(); ++it)
         EquipItem(*it);
     SendNotEquipList(*m_bot);
+}
+
+void PlayerbotAI::_HandleCommandUnequip(std::string &text, Player& /*fromPlayer*/)
+{
+    std::list<uint32> itemIds;
+    std::list<Item*> itemList;
+    extractItemIds(text, itemIds);
+    findItemsInEquip(itemIds, itemList);
+    for (std::list<Item*>::iterator it = itemList.begin(); it != itemList.end(); ++it)
+        UnequipItem(*it);
+    
 }
 
 void PlayerbotAI::_HandleCommandFind(std::string &text, Player& /*fromPlayer*/)
