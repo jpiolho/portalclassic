@@ -6596,7 +6596,7 @@ void PlayerbotAI::_HandleCommandUnequip(std::string &text, Player& fromPlayer)
     }
     else
     {
-        TellMaster("Could not un-equip any item", fromPlayer);
+        TellMaster("Could not un-equip any item");
     }
 }
 
