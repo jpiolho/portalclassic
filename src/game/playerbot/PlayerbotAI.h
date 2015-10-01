@@ -416,6 +416,7 @@ public:
     void Announce(AnnounceFlags msg);
 
     void EquipItem(Item* src_Item);
+    bool UnequipItem(Item* src_Item);
     //void Stay();
     //bool Follow(Player& player);
     void SendNotEquipList(Player& player);
@@ -536,6 +537,7 @@ private:
     void _HandleCommandBank(std::string &text, Player &fromPlayer);
     void _HandleCommandUse(std::string &text, Player &fromPlayer);
     void _HandleCommandEquip(std::string &text, Player &fromPlayer);
+    void _HandleCommandUnequip(std::string &text, Player &fromPlayer);
     void _HandleCommandFind(std::string &text, Player &fromPlayer);
     void _HandleCommandGet(std::string &text, Player &fromPlayer);
     void _HandleCommandCollect(std::string &text, Player &fromPlayer);
