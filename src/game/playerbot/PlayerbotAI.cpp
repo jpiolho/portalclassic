@@ -5175,14 +5175,14 @@ void PlayerbotAI::EquipItem(Item* src_Item)
     }
 }
 
-void PlayerbotAI::UnequipItem(Item* src_item)
+bool PlayerbotAI::UnequipItem(Item* src_item)
 {
     uint8 src_slot = src_item->GetSlot();
     InventoryResult msg = m_bot->CanUnequipItem(src_slot,false);
     if (msg != EQUIP_ERR_OK)
     {
         m_bot->SendEquipError(msg, src_item, NULL);
-        return;
+        return false;
     }
 
     ItemPosCountVec dst_slot;
@@ -5194,8 +5194,10 @@ void PlayerbotAI::UnequipItem(Item* src_item)
     else
     {
         m_bot->SendEquipError(msg, src_item, NULL);
-        return;
+        return false;
     }
+
+    return true;
 }
 
 // submits packet to trade an item (trade window must already be open)
@@ -6562,15 +6564,40 @@ void PlayerbotAI::_HandleCommandEquip(std::string &text, Player& /*fromPlayer*/)
     SendNotEquipList(*m_bot);
 }
 
-void PlayerbotAI::_HandleCommandUnequip(std::string &text, Player& /*fromPlayer*/)
+void PlayerbotAI::_HandleCommandUnequip(std::string &text, Player& fromPlayer)
 {
+    std::ostringstream out;
+
+    out << "I un-equipped these items:";
+
     std::list<uint32> itemIds;
     std::list<Item*> itemList;
     extractItemIds(text, itemIds);
     findItemsInEquip(itemIds, itemList);
+    bool success = false;
     for (std::list<Item*>::iterator it = itemList.begin(); it != itemList.end(); ++it)
-        UnequipItem(*it);
+        if (UnequipItem(*it)) {
+            const ItemPrototype* const pItemProto = (*it)->GetProto();
+
+            std::string itemName = pItemProto->Name1;
+            ItemLocalization(itemName, pItemProto->ItemId);
+
+            out << " |cffffffff|Hitem:" << pItemProto->ItemId
+                << ":0:0:0:0:0:0:0" << "|h[" << itemName
+                << "]|h|r";
+
+            success = true;
+        }
     
+    
+    if (success)
+    {
+        TellMaster(out.str().c_str());
+    }
+    else
+    {
+        TellMaster("Could not un-equip any item", fromPlayer);
+    }
 }
 
 void PlayerbotAI::_HandleCommandFind(std::string &text, Player& /*fromPlayer*/)

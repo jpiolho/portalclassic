@@ -416,7 +416,7 @@ public:
     void Announce(AnnounceFlags msg);
 
     void EquipItem(Item* src_Item);
-    void UnequipItem(Item* src_Item);
+    bool UnequipItem(Item* src_Item);
     //void Stay();
     //bool Follow(Player& player);
     void SendNotEquipList(Player& player);
